@@ -16,7 +16,25 @@
 
 import Foundation
 
-func unitCalculation(startingRange: Int, endingRange: Int) -> Int {
+enum BillType {
+    case domestic
+    case commercial
+
+    enum domesticTariff: Float {
+        case serviceCharge = 50
+        case hundredRange = 100, hundredMultiplier = 3.50
+        case twoHundredRange = 200, twoHundredMultiplier = 4.60
+        case fiveHundredRange = 500, fiveHundredMultiplier = 6.60
+    }
+
+    enum commercialTariff: Float {
+        case serviceCharge = 290
+        case belowHundredRange = 0, belowHundredMultiplier = 5.0
+        case aboveHundredRange = 100, aboveHundredMultiplier = 6.60
+    }
+}
+
+func unitCalculationForTwoMonths(startingRange: Int, endingRange: Int) -> Int {
     var unitForTwoMonths: Int = 0
     for _ in 1...60 {
         let unitPerDay = Int.random(in: startingRange...endingRange)
@@ -25,45 +43,57 @@ func unitCalculation(startingRange: Int, endingRange: Int) -> Int {
     return unitForTwoMonths
 }
 
-func billCalculation(units: Int, tariffRange: Int, tariffMultiplier: Float) -> Float {
-    billAmount = Float(units - tariffRange) * tariffMultiplier 
+func costCalculation(units: Int, tariffRange: Float, tariffMultiplier: Float) -> Float {
+    let costValue = Float(Float(units) - tariffRange) * tariffMultiplier 
+    return costValue
+}
+
+func domesticBillCalculation() -> Float{
+    var billAmount: Float = 0
+    let totalUnits = unitCalculationForTwoMonths(startingRange: 1, endingRange: 10)   
+    print("The Reading for 2 months is \(totalUnits)")    
+    let serviceCharge = BillType.domesticTariff.serviceCharge.rawValue
+    let hundredRange = BillType.domesticTariff.hundredRange.rawValue, hundredMultiplier = BillType.domesticTariff.hundredMultiplier.rawValue
+    let twoHundredRange = BillType.domesticTariff.twoHundredRange.rawValue, twoHundredMultiplier = BillType.domesticTariff.twoHundredMultiplier.rawValue
+    let fiveHundredRange = BillType.domesticTariff.fiveHundredRange.rawValue, fiveHundredMultiplier = BillType.domesticTariff.fiveHundredMultiplier.rawValue
+    let costForHundredUnits: Float = (hundredRange * hundredMultiplier)
+    let costForThreeHundredUnits: Float = (300 * twoHundredMultiplier)
+    if totalUnits >= Int(fiveHundredRange) {
+        billAmount = costCalculation(units: totalUnits, tariffRange: fiveHundredRange, tariffMultiplier: fiveHundredMultiplier) + (costForThreeHundredUnits) + (costForHundredUnits)
+    } else if totalUnits >= Int(twoHundredRange) {
+        billAmount = costCalculation(units: totalUnits, tariffRange: twoHundredRange, tariffMultiplier: twoHundredMultiplier) + (costForHundredUnits)
+    } else if totalUnits >= Int(hundredRange) {
+        billAmount = costCalculation(units: totalUnits, tariffRange: hundredRange, tariffMultiplier: hundredMultiplier)
+    }
+    billAmount += serviceCharge
     return billAmount
 }
 
-enum BillType: String {
-    case domestic
-    case commercial
+func commercialBillCalculation() -> Float {
+    var billAmount: Float = 0
+    let totalUnits = unitCalculationForTwoMonths(startingRange: 10, endingRange: 100)
+    print("The Reading for 2 months is \(totalUnits)")
+    let serviceCharge = BillType.commercialTariff.serviceCharge.rawValue
+    let belowHundredRange = BillType.commercialTariff.belowHundredRange.rawValue, belowHundredMultiplier = BillType.commercialTariff.belowHundredMultiplier.rawValue
+    let aboveHundredRange = BillType.commercialTariff.belowHundredRange.rawValue, aboveHundredMultiplier = BillType.commercialTariff.aboveHundredMultiplier.rawValue
+    let costForHundredUnits: Float = (belowHundredRange * belowHundredMultiplier)    
+    if totalUnits >= Int(aboveHundredRange) {
+        billAmount = costCalculation(units: totalUnits, tariffRange: aboveHundredRange, tariffMultiplier: aboveHundredMultiplier) + (costForHundredUnits)
+    } else {
+        billAmount = costCalculation(units: totalUnits, tariffRange: belowHundredRange, tariffMultiplier: belowHundredMultiplier)
+    }
+    billAmount += serviceCharge
+    return billAmount
 }
 
-var billAmount: Float = 0
 let billType = BillType.domestic
-if billType.rawValue == "domestic" {
-    print("Calculating Bill for Domestic")
-    let serviceCharge: Float = 50
-    let totalUnits = unitCalculation(startingRange: 1, endingRange: 10)    
-    print("The Reading for 2 months is \(totalUnits)")
-    let amountForHunderedUnits: Float = (100 * 3.50)
-    let amountForThreeHunderedUnits: Float = (300 * 4.60)
-    if totalUnits > 500 {
-        billAmount = billCalculation(units: totalUnits, tariffRange: 500, tariffMultiplier: 6.60) + (amountForThreeHunderedUnits) + (amountForHunderedUnits)
-    } else if totalUnits > 200 {
-        billAmount = billCalculation(units: totalUnits, tariffRange: 200, tariffMultiplier: 4.60) + (amountForHunderedUnits)
-    } else if totalUnits > 100 {
-        billAmount = billCalculation(units: totalUnits, tariffRange: 100, tariffMultiplier: 3.50)
-    }
-    billAmount += serviceCharge
-    print("The Bill is \(billAmount)")
-} else if billType.rawValue == "commercial" {
-    print("Calculating Bill for Commercial")
-    let serviceCharge: Float = 290
-    let totalUnits = unitCalculation(startingRange: 10, endingRange: 100)
-    print("The Reading for 2 months is \(totalUnits)")
-    let amountForHunderedUnits: Float = (100 * 5.0)
-    if totalUnits > 100 {
-        billAmount = billCalculation(units: totalUnits, tariffRange: 100, tariffMultiplier: 6.60) + (amountForHunderedUnits)
-    } else {
-        billAmount = billCalculation(units: totalUnits, tariffRange: 0, tariffMultiplier: 5.0)
-    }
-    billAmount += serviceCharge
-    print("The Bill is \(billAmount)")
+switch billType {
+    case .domestic:
+        print("Calculating Bill for Domestic")
+        let calculatedBillAmount = domesticBillCalculation()
+        print("The Bill is \(calculatedBillAmount)")
+    case .commercial:
+        print("Calculating Bill for Commercial")
+        let calculatedBillAmount = commercialBillCalculation()
+        print("The Bill is \(calculatedBillAmount)")
 }
