@@ -17,13 +17,14 @@
 import Foundation
 
 struct ElectricityBill {
+    var serviceCharge: Float
     var rangeArray: [Float]
     var tariffArray: [Float]
 
-    func unitCalculationForTwoMonths(startingRange: Int, endingRange: Int) -> Int {
+    func unitCalculationForTwoMonths(startRange: Int, endRange: Int) -> Int {
         var unitForTwoMonths: Int = 0
         for _ in 1...60 {
-            let unitPerDay = Int.random(in: startingRange...endingRange)
+            let unitPerDay = Int.random(in: startRange...endRange)
             unitForTwoMonths += unitPerDay
         }
         return unitForTwoMonths
@@ -34,19 +35,22 @@ struct ElectricityBill {
         return costValue
     }
 
-    func billCalculation(totalUnits: Int, serviceCharge: Float) -> Float {
-        var billAmount: Float = 0
-        let totalUnits = unitCalculationForTwoMonths(startingRange: 1, endingRange: 10)   
-        print("The Reading for 2 months is \(totalUnits)")    
+    func calculateAmountFor(balanceRange: Int) -> Float {
         var balanceAmount: [Float] = []    
-        for range in 0..<rangeArray.count - 1 {
+        for range in 0...balanceRange {
             let difference: Float = rangeArray[range + 1] - rangeArray[range]
             balanceAmount.append(difference * tariffArray[range])
         }
+        return balanceAmount.reduce(0, +)
+    }
+
+    func billCalculation(totalUnits: Int, serviceCharge: Float) -> Float {
+        var billAmount: Float = 0
+        print("The Reading for 2 months is \(totalUnits)")    
         var count = rangeArray.count - 1
         while count != -1 {
             if totalUnits >= Int(rangeArray[count]) {
-                billAmount = costCalculation(units: totalUnits, tariffRange: rangeArray[count], tariffMultiplier: tariffArray[count]) + balanceAmount.dropLast((rangeArray.count - 1) - (count)).reduce(0, +)
+                billAmount = costCalculation(units: totalUnits, tariffRange: rangeArray[count], tariffMultiplier: tariffArray[count]) + calculateAmountFor(balanceRange: count - 1)//balanceAmount.dropLast((rangeArray.count - 1) - (count)).reduce(0, +)
                 break
             }           
             count -= 1
@@ -65,16 +69,14 @@ let billType = BillType.domestic
 switch billType {
     case .domestic:
         print("Calculating Bill for Domestic")
-        let serviceCharge: Float = 50
-        var electricBill = ElectricityBill(rangeArray: [0, 100, 200, 500], tariffArray: [0, 3.50, 4.60, 6.60])
-        let totalUnits = electricBill.unitCalculationForTwoMonths(startingRange: 1, endingRange: 10)
-        let calculatedBillAmount = electricBill.billCalculation(totalUnits: totalUnits, serviceCharge: serviceCharge)
+        var electricBill = ElectricityBill(serviceCharge: 50, rangeArray: [0, 100, 200, 500], tariffArray: [0, 3.50, 4.60, 6.60])
+        let totalUnits = electricBill.unitCalculationForTwoMonths(startRange: 1, endRange: 10)
+        let calculatedBillAmount = electricBill.billCalculation(totalUnits: totalUnits, serviceCharge: electricBill.serviceCharge)
         print("The Bill is \(calculatedBillAmount)")
     case .commercial:
         print("Calculating Bill for Commercial")
-        let serviceCharge: Float = 290
-        var electricBill = ElectricityBill(rangeArray: [0, 100], tariffArray: [5.50, 6.60])
-        let totalUnits = electricBill.unitCalculationForTwoMonths(startingRange: 1, endingRange: 10)
-        let calculatedBillAmount = electricBill.billCalculation(totalUnits: totalUnits, serviceCharge: serviceCharge)
+        var electricBill = ElectricityBill(serviceCharge: 290, rangeArray: [0, 100], tariffArray: [5.50, 6.60])
+        let totalUnits = electricBill.unitCalculationForTwoMonths(startRange: 10, endRange: 100)
+        let calculatedBillAmount = electricBill.billCalculation(totalUnits: totalUnits, serviceCharge: electricBill.serviceCharge)
         print("The Bill is \(calculatedBillAmount)")
 }
