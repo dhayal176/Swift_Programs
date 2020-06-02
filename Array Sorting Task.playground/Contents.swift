@@ -10,39 +10,39 @@ struct ArrayDetails {
     var integerArray: [Int]
     var index: Int
 
-    func selectionSort(array: inout [Int], size: Int) -> [Int] {
+    func performSelectionSort(for integerArray: inout [Int], with size: Int) -> [Int] {
         var minimumValue: Int
         var numberOfSwaps = 0
         for range in 0..<size - 1 {
             minimumValue = range
             for element in range + 1..<size {
-                if array[element] < array[minimumValue] {
+                if integerArray[element] < integerArray[minimumValue] {
                     minimumValue = element
                 }
             }
-            if array[minimumValue] != array[range] {
-                let temp = array[minimumValue]
-                array[minimumValue] = array[range]
-                array[range] = temp
+            if integerArray[minimumValue] != integerArray[range] {
+                let tempSwap = integerArray[minimumValue]
+                integerArray[minimumValue] = integerArray[range]
+                integerArray[range] = tempSwap
                 numberOfSwaps += 1
             }
         }
         print("The Number of Swaps Required for Sorting is \(numberOfSwaps)")
-        return array
+        return integerArray
     }
 
-    func resultCalculation(array: [Int], index: inout Int) -> Int {
-        var result = 0
+    func calulateSumOfIndexValueForSortedArray(till index: inout Int) -> Int {
+        var sumOfIndexValue = 0
         while index != 0 {
-            result += array[index] - array[index - 1]
+            sumOfIndexValue += integerArray[index] - integerArray[index - 1]
             index -= 1
         }
-        return result
+        return sumOfIndexValue
     }
 }
 
 var array = ArrayDetails(sizeOfTheArray: 6, integerArray: [2, 7, 4, 11, 30, 22], index: 3)
-let sortedArray = array.selectionSort(array: &array.integerArray, size: array.sizeOfTheArray)
-let result = array.resultCalculation(array: sortedArray, index: &array.index)
+let sortedArray = array.performSelectionSort(for: &array.integerArray, with: array.sizeOfTheArray)
+let sumOfIndexValue = array.calulateSumOfIndexValueForSortedArray(till: &array.index)
 print("The Sorted Array is \(sortedArray)")
-print("The Calculated Result is \(result)")
+print("The Calculated Result is \(sumOfIndexValue)")
