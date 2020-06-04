@@ -1,28 +1,31 @@
 import Foundation
 
-var inputExpression = "((12 + 23.4) + 4 + (5.54 - 6))"
-let tempArrayForOperators = inputExpression.replacingOccurrences(of: " ", with: "", options: .regularExpression, range: nil)
-let tempArray = tempArrayForOperators.replacingOccurrences(of: "[+-]", with: "()", options: .regularExpression, range: nil)
+var input = "((12 / 23.4) * 4 + (5.54 - 6))"
+
 let symbolArray = ["+", "-", "/", "*","(",")"]
 var postfixArray: [String] = []
 
-var characterSet = CharacterSet.decimalDigits
-characterSet.insert(charactersIn: ".")
-
-var infixArray = tempArray.components(separatedBy: characterSet.inverted)
-let symbolExpression = tempArrayForOperators.replacingOccurrences(of:"[0123456789.]", with: "", options: .regularExpression, range: nil)
-let symbolsInInput = Array(symbolExpression)
-
-for eachSymbol in 0..<symbolsInInput.count {
-    for eachElement in 0..<infixArray.count {
-        if infixArray[eachElement] == "" {
-            infixArray[eachElement] = String(symbolsInInput[eachSymbol])
-            break
+func createInfixExpression(for inputExpression: String) -> [String] {
+    let tempArray = inputExpression.replacingOccurrences(of: " ", with: "", options: .regularExpression, range: nil)
+    let tempArrayForInfixArray = tempArray.replacingOccurrences(of: "[*/+-]", with: "()", options: .regularExpression, range: nil)
+    var calculatorCharacterSet = CharacterSet.decimalDigits
+    calculatorCharacterSet.insert(charactersIn: ".")
+    var infixArray = tempArrayForInfixArray.components(separatedBy: calculatorCharacterSet.inverted)
+    let symbolExpression = tempArray.replacingOccurrences(of:"[0123456789.]", with: "", options: .regularExpression, range: nil)
+    let symbolsInInput = Array(symbolExpression)
+    
+    for eachSymbol in 0..<symbolsInInput.count {
+        for eachElement in 0..<infixArray.count {
+            if infixArray[eachElement] == "" {
+                infixArray[eachElement] = String(symbolsInInput[eachSymbol])
+                break
+            }
         }
     }
+    return infixArray
 }
 
-func infixToPostfix() {
+func changeInfixToPostfix(for infixArray: [String]) -> [String] {
     let orderOfPrecedence = ["+": 1, "-": 1, "*": 2, "/": 2, "(": 0]
     var operatorArray: [String] = []
     for eachElement in infixArray {
@@ -46,17 +49,19 @@ func infixToPostfix() {
     while !operatorArray.isEmpty {
         postfixArray.append(operatorArray.removeLast())
     }
+    return postfixArray
 }
 
-func resultCalculation() -> Double {
+func calculateResult() -> Double {
+    
     var operandsArray: [Double] = []
-    var symbolsBaseValueDictionary = ["*" : 1.0, "/": 1.0, "+": 0.0, "-": 0.0]
+    var operatorDictionary = ["*" : 1.0, "/": 1.0, "+": 0.0, "-": 0.0]
     for eachElement in postfixArray {
         if (symbolArray.contains(String(eachElement)) ) {
             if operandsArray.count == 1 {
-                operandsArray.append(calculateArithmeticOperation(operator: eachElement, secondOperand: operandsArray.removeLast(), firstOperand: symbolsBaseValueDictionary[eachElement]!))
+                operandsArray.append(performArithmeticOperation(operator: eachElement, secondOperand: operandsArray.removeLast(), firstOperand: operatorDictionary[eachElement]!))
             } else {
-                operandsArray.append(calculateArithmeticOperation(operator: eachElement, secondOperand: operandsArray.removeLast(), firstOperand: operandsArray.removeLast()))
+                operandsArray.append(performArithmeticOperation(operator: eachElement, secondOperand: operandsArray.removeLast(), firstOperand: operandsArray.removeLast()))
             }      
         } else {
             operandsArray.append(Double(String(eachElement)) ?? 0)
@@ -65,7 +70,7 @@ func resultCalculation() -> Double {
    return operandsArray.removeLast()
 }
 
-func calculateArithmeticOperation(operator: String, secondOperand: Double, firstOperand: Double) -> Double {
+func performArithmeticOperation(operator: String, secondOperand: Double, firstOperand: Double) -> Double {
     switch `operator` {
     case "+":
         return firstOperand + secondOperand
@@ -80,5 +85,6 @@ func calculateArithmeticOperation(operator: String, secondOperand: Double, first
     }
 }
 
-infixToPostfix()
-print("The Answer for \(inputExpression) is: \(resultCalculation())")
+var infixExpression = createInfixExpression(for: input)
+var postfixExpression = changeInfixToPostfix(for: infixExpression)
+print("The Answer for \(input) is: \(calculateResult())")
