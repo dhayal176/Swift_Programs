@@ -1,9 +1,16 @@
+/*Problem Statement : Create a simple calculator to accept the input expression as a string.
+                      The result is calculated based on operator precedence.
+                      Eg: (1+2)*(3-2)+4
+                          =3*1+4
+                          =3+4
+                          =7     
+*/
+
 import Foundation
 
 var input = "((12 / 23.4) * 4 + (5.54 - 6))"
 
 let symbolArray = ["+", "-", "/", "*","(",")"]
-var postfixArray: [String] = []
 
 func createInfixExpression(for inputExpression: String) -> [String] {
     let tempArray = inputExpression.replacingOccurrences(of: " ", with: "", options: .regularExpression, range: nil)
@@ -26,6 +33,7 @@ func createInfixExpression(for inputExpression: String) -> [String] {
 }
 
 func changeInfixToPostfix(for infixArray: [String]) -> [String] {
+    var postfixArray: [String] = []
     let orderOfPrecedence = ["+": 1, "-": 1, "*": 2, "/": 2, "(": 0]
     var operatorArray: [String] = []
     for eachElement in infixArray {
@@ -52,11 +60,10 @@ func changeInfixToPostfix(for infixArray: [String]) -> [String] {
     return postfixArray
 }
 
-func calculateResult() -> Double {
-    
+func calculateResult(for postfixExpression: [String]) -> Double {
     var operandsArray: [Double] = []
     var operatorDictionary = ["*" : 1.0, "/": 1.0, "+": 0.0, "-": 0.0]
-    for eachElement in postfixArray {
+    for eachElement in postfixExpression {
         if (symbolArray.contains(String(eachElement)) ) {
             if operandsArray.count == 1 {
                 operandsArray.append(performArithmeticOperation(operator: eachElement, secondOperand: operandsArray.removeLast(), firstOperand: operatorDictionary[eachElement]!))
@@ -87,4 +94,4 @@ func performArithmeticOperation(operator: String, secondOperand: Double, firstOp
 
 var infixExpression = createInfixExpression(for: input)
 var postfixExpression = changeInfixToPostfix(for: infixExpression)
-print("The Answer for \(input) is: \(calculateResult())")
+print("The Answer for \(input) is: \(calculateResult(for: postfixExpression))")
